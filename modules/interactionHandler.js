@@ -2,6 +2,7 @@ const { addUser, removeUser, getGuildUsers, initializeGuildConfig, updateGuildCh
 const { enhancedCheck } = require('./apiUtils');
 const { updateGuildCronJobs } = require('./scheduledTasks');
 const logger = require('./logger');
+const { calculateStreak, calculateCompletionRates, generateLeaderboard } = require('./statsUtils');
 
 async function handleInteraction(interaction) {
     logger.info(`Interaction received: ${interaction.commandName}`);
@@ -39,6 +40,15 @@ async function handleInteraction(interaction) {
                 break;
             case 'botinfo':
                 await handleBotInfo(interaction);
+                break;
+            case 'streak':
+                await handleStreak(interaction);
+                break;
+            case 'leaderboard':
+                await handleLeaderboard(interaction);
+                break;
+            case 'stats':
+                await handleStats(interaction);
                 break;
             default:
                 await interaction.reply('Unknown command.');
@@ -237,6 +247,34 @@ async function handleBotInfo(interaction) {
     };
 
     await interaction.reply({ embeds: [botInfoEmbed] });
+}
+
+async function handleStreak(interaction) {
+    await interaction.deferReply();
+    const streak = await calculateStreak(interaction.user.id, interaction.guildId);
+    await interaction.editReply(`Your current streak is **${streak}** days! Keep it up!`);
+}
+
+async function handleLeaderboard(interaction) {
+    await interaction.deferReply();
+    const leaderboard = await generateLeaderboard(interaction.guildId);
+    if (leaderboard.length === 0) {
+        await interaction.editReply('No leaderboard data available yet. Encourage your server members to participate!');
+        return;
+    }
+
+    const leaderboardMessage = leaderboard
+        .map(entry => `**#${entry.rank}** <@${entry.userId}> - **${entry.streak}** days`)
+        .join('\n');
+
+    await interaction.editReply(`🏆 **Leaderboard** 🏆\n${leaderboardMessage}`);
+}
+
+async function handleStats(interaction) {
+    await interaction.deferReply();
+    const period = interaction.options.getString('period');
+    const stats = await calculateCompletionRates(interaction.user.id, interaction.guildId, period);
+    await interaction.editReply(`You have completed **${stats.total}** challenges in the past ${stats.period}. Great job!`);
 }
 
 module.exports = { handleInteraction };

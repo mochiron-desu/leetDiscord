@@ -5,6 +5,7 @@ const axios = require('axios');
 const logger = require('./logger');
 const Guild = require('./models/Guild');
 const DailySubmission = require('./models/DailySubmission');
+const { calculateStreak } = require('./statsUtils');
 
 // Helper function to safely parse submission timestamp
 function parseSubmissionTime(submission) {
@@ -156,7 +157,9 @@ async function scheduleDailyCheck(client, guildId, channelId, schedule) {
                                     questionTitle: problem.title,
                                     questionSlug: dailySlug,
                                     difficulty: problem.difficulty,
-                                    submissionTime
+                                    submissionTime,
+                                    completed: true,
+                                    streakCount: await calculateStreak(discordId || username, guildId)
                                 });
                             }
                         } else {

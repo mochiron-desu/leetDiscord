@@ -1,6 +1,7 @@
 const axios = require('axios');
 const logger = require('./logger');
 const DailySubmission = require('./models/DailySubmission');
+const { calculateStreak } = require('./statsUtils');
 
 // Fetch today’s daily challenge slug
 async function getDailySlug() {
@@ -127,7 +128,9 @@ async function enhancedCheck(users, client, channelId) {
                             questionTitle: problem.title,
                             questionSlug: dailyData,
                             difficulty: problem.difficulty,
-                            submissionTime
+                            submissionTime,
+                            completed: true,
+                            streakCount: await calculateStreak(userId, guild.id)
                         });
                     }
                 } catch (error) {

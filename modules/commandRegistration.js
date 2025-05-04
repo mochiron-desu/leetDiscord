@@ -82,6 +82,26 @@ const commands = [
     new SlashCommandBuilder()
         .setName('botinfo')
         .setDescription('Display information about the bot and its GitHub repository')
+        .toJSON(),
+    new SlashCommandBuilder()
+        .setName('streak')
+        .setDescription('Check your current streak for completing LeetCode Daily Challenges')
+        .toJSON(),
+    new SlashCommandBuilder()
+        .setName('leaderboard')
+        .setDescription('View the leaderboard for LeetCode Daily Challenge streaks in this server')
+        .toJSON(),
+    new SlashCommandBuilder()
+        .setName('stats')
+        .setDescription('View your weekly or monthly completion stats for LeetCode Daily Challenges')
+        .addStringOption(option =>
+            option.setName('period')
+                .setDescription('Choose the period: weekly or monthly')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Weekly', value: 'weekly' },
+                    { name: 'Monthly', value: 'monthly' }
+                ))
         .toJSON()
 ];
 
